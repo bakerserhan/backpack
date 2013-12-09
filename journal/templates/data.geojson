@@ -1,0 +1,12 @@
+[
+  { "geometry": { "type": "Point", "coordinates": [28.976960, 41.005270] },
+    "properties": { "id": "cover", "zoom": 14 } },
+  { "geometry": { "type": "Point", "coordinates": [29.467435, 40.792395] },
+    "properties": { "id": "meet", "zoom": 19 } },
+  { "geometry": { "type": "Point", "coordinates": [29.002866, 41.056122] },
+    "properties": { "id": "firstkiss", "zoom": 20 } },
+  { "geometry": { "type": "Point", "coordinates": [28.975520, 41.030524] },
+    "properties": { "id": "firstdate", "zoom": 20 } },
+  { "geometry": { "type": "Point", "coordinates": [29.001621, 41.057780] },
+    "properties": { "id": "lastbreakfast", "zoom": 20 } }
+]

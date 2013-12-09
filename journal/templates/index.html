@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='UTF-8'/>
+<!--[if lt IE 9]>
+<script src="https://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="{{url_for('static', filename = 'js/underscore-min.js')}}"></script>
+<script src='http://api.tiles.mapbox.com/mapbox.js/v0.6.7/mapbox.js'></script>
+<link href='http://api.tiles.mapbox.com/mapbox.js/v0.6.7/mapbox.css' rel='stylesheet' />
+<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="{{url_for('static', filename = 'css/style.css')}}" />
+
+</head>
+<body class='section-0'>
+
+<div id='pane'><div id='map'></div></div>
+
+<article>
+  <section id='cover' class='cover active'>
+    <h1>Love Journal</h1>
+    <h5><p>Made with <font color="red">&hearts;</font> by <a href="http://serhanbaker.com" target="_blank">@serhanbaker</a>.</p></h5>
+    <small class='scroll'>Scroll ▼</small>
+  </section>
+  {% include 'sections.html' %}
+</article>
+
+<script>
+var geojson = {% include 'data.geojson' %};
+var tiles = mapbox.layer().tilejson({
+  tiles: [ "https://a.tiles.mapbox.com/v3/serhanbaker.ggh22301/{z}/{x}/{y}.png" ]
+});
+
+mapbox.markers.marker_baseurl = 'https://a.tiles.mapbox.com/v3/marker/';
+
+var spots = mapbox.markers.layer()
+  .features(geojson)
+  .factory(function(f) {
+    var el = document.createElement('div');
+    el.className = 'spot spot-' + f.properties.id;
+    return el;
+  });
+var map = mapbox.map('map', [tiles, spots], null, []);
+var sections = document.getElementsByTagName('section');
+var markers = _(sections).map(function(section) {
+  return _(spots.markers()).find(function(m) {
+    return m.data.properties.id === section.id;
+  });
+});
+
+var setActive = function(index, ease) {
+  _(sections).each(function(s) { s.className = s.className.replace(' active', '') });
+  _(markers).each(function(m) { m.element.className = m.element.className.replace(' active', '') });
+  sections[index].className += ' active';
+  markers[index].element.className += ' active';
+
+  document.body.className = 'section-' + index;
+
+  if (!ease) {
+    map.centerzoom(markers[index].location, markers[index].data.properties.zoom||14);
+  } else {
+    map.ease.location(markers[index].location).zoom(markers[index].data.properties.zoom||14).optimal(0.5, 1.00);
+  }
+
+  return true;
+};
+
+window.onscroll = _(function() {
+  // IE 8
+  if (window.pageYOffset === undefined) {
+    var y = document.documentElement.scrollTop;
+    var h = document.documentElement.clientHeight;
+  } else {
+    var y = window.pageYOffset;
+    var h = window.innerHeight;
+  }
+
+  if (y === 0) return setActive(0, true);
+
+  var memo = 0;
+  var buffer = (h * 0.3333);
+  var active = _(sections).any(function(el, index) {
+    memo += el.offsetHeight;
+    return y < (memo-buffer) ? setActive(index, true) : false;
+  });
+
+
+  if (!active) setActive(sections.length - 1, true);
+}).debounce(10);
+
+setActive(0, false);
+</script>
+
+</body>
+</html>
